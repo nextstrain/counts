@@ -13,7 +13,7 @@ settings:
 
 model:
   generation_time: 4.8
-  pivot: "24A"
+  pivot: "24F"
   hierarchical: true
 
 inference:

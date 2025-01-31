@@ -20,6 +20,10 @@ function App() {
   const mlrCladesData = useModelData(mlrCladesConfig);
   const mlrLineagesData = useModelData(mlrLineagesConfig);
 
+  const mlrCladesPivotRaw = mlrCladesData?.modelData?.get('pivot') || "loading";
+  const mlrCladesPivot = mlrCladesData?.modelData?.get('variantDisplayNames')?.get(mlrCladesPivotRaw) || mlrCladesPivotRaw;
+  const mlrLineagesPivot = mlrLineagesData?.modelData?.get('pivot') || "loading";
+
   const cladesLocationsFiltered = mlrCladesData?.modelData?.get('locations')?.filter((loc)=>loc!=='hierarchical') || [];
   const lineagesLocationsFiltered = mlrLineagesData?.modelData?.get('locations')?.filter((loc)=>loc!=='hierarchical') || [];
 
@@ -40,9 +44,9 @@ function App() {
 
         <h2>Clade growth advantage</h2>
         <p>
-          These plots show the estimated growth advantage for given clades relative to clade
-          24F (lineage XEC). This describes how many more secondary infections a variant causes
-          on average relative to clade 24F. Vertical bars show the 95% HPD. The "hierarchical" panel
+          These plots show the estimated growth advantage for given clades relative to
+          clade {mlrCladesPivot}. This describes how many more secondary infections a variant causes
+          on average relative to clade {mlrCladesPivot}. Vertical bars show the 95% HPD. The "hierarchical" panel
           shows pooled estimate of growth rates across different locations.
           Results last updated {mlrCladesData?.modelData?.get('updated') || 'loading'}.
         </p>
@@ -64,8 +68,8 @@ function App() {
         <h2>Lineage growth advantage</h2>
         <p>
           These plots show the estimated growth advantage for given Pango lineages relative to
-          lineage XEC. This describes how many more secondary infections a variant causes
-          on average relative to lineage XEC. Vertical bars show the 95% HPD.
+          lineage {mlrLineagesPivot}. This describes how many more secondary infections a variant causes
+          on average relative to lineage {mlrLineagesPivot}. Vertical bars show the 95% HPD.
           The "hierarchical" panel shows pooled estimate of growth rates across different locations.
           Results last updated {mlrLineagesData?.modelData?.get('updated') || 'loading'}.
         </p>

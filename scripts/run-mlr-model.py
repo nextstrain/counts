@@ -276,11 +276,10 @@ def make_raw_freq_tidy(data, location):
     return {"metadata": metadata, "data": entries}
 
 
-def export_results(multi_posterior, ps, path, data_name, hier):
+def export_results(multi_posterior, ps, path, data_name, hier, pivot):
     EXPORT_SITES = ["freq", "ga", "freq_forecast"]
     EXPORT_DATED = [True, False, True]
     EXPORT_FORECASTS = [False, False, True]
-    EXPORT_ATTRS = ["pivot"]
 
     # Make directories
     make_model_directories(path)
@@ -351,6 +350,27 @@ def export_results(multi_posterior, ps, path, data_name, hier):
 
     results = ef.posterior.combine_sites_tidy(results)
     results["metadata"]["updated"] = pd.to_datetime(date.today())
+
+    # Add hard-coded pivot data if a pivot is provided
+    if pivot:
+        results["metadata"]["pivot"] = pivot
+        # Mirroring the ps keys generated within evofr
+        # <https://github.com/blab/evofr/blob/e883784dc397805c50bbcd56b083f4f232b03e17/evofr/posterior/posterior_helpers.py#L296C5-L299C54>
+        ps_keys = ["median"]
+        for p in ps:
+            ps_keys.append(f"HDI_{round(p * 100)}_upper")
+            ps_keys.append(f"HDI_{round(p * 100)}_lower")
+
+        for location, _ in multi_posterior.locator.items():
+            for ps_key in ps_keys:
+                results["data"].append({
+                    "location": location,
+                    "site": "ga",
+                    "variant": pivot,
+                    "value": 1.0,
+                    "ps": ps_key
+                })
+
     ef.save_json(results, path=f"{path}/{data_name}_results.json")
 
 
@@ -390,7 +410,7 @@ if __name__ == "__main__":
     print(f"Config loaded: {config.path}")
 
     raw_seq, locations = config.load_data(args.seq_path)
-    print("Data loaded sucessfuly")
+    print("Data loaded successfully")
 
     override_hier = None
     if args.hier:
@@ -452,4 +472,4 @@ if __name__ == "__main__":
             config.config["settings"], "ps", dflt=[0.5, 0.8, 0.95]
         )
         data_name = args.data_name or config.config["data"]["name"]
-        export_results(multi_posterior, ps, export_path, data_name, hier)
+        export_results(multi_posterior, ps, export_path, data_name, hier, pivot)
